@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define _POSIX_C_SOURCE >= 200810L
+
+
+char* getUserInput(char* theArray) {
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t nread = getline(&line, &len, stdin);
+  return line;
+}
+
+void printUserInput(char* theArray, int count) {
+  for (int i = 0; i < count; i++) {
+        printf("%s", &theArray[i]);
+    }
+}
+
+int main() {  
+  char theArray[5];
+  int counter = 0;
+  while (counter < 5) {
+    char* input = getUserInput(theArray);
+
+    theArray[counter] = *input;
+    counter++;
+
+    if (strcmp(input, "print\n") == 0) {
+      printUserInput(theArray, counter);
+      counter = 0;
+    }
+  }
+
+  for (int i = 0; i < counter; i++) {
+    free(&theArray[i]);
+  }
+
+  return 0;
+}
+    
+
