@@ -1,0 +1,93 @@
+#define _POSIX_C_SOURCE 200809L
+#define _GNU_SOURCE
+
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define handle_error(msg)                                                      \
+  do {                                                                         \
+    perror(msg);                                                               \
+    exit(EXIT_FAILURE);                                                        \
+  } while (0)
+
+struct header {
+  uint64_t size;
+  struct header *next;
+};
+
+void print_out(char *format, void *data, size_t dataSize) {
+  int bufferSize = 256;
+  char buf[bufferSize];
+  ssize_t len = snprintf(buf, bufferSize, format,
+                         dataSize == sizeof(uint64_t) ? *(uint64_t *)data
+                                                      : *(void **)data);
+  if (len < 0) {
+    handle_error("snprintf");
+  }
+  write(STDOUT_FILENO, buf, len);
+}
+
+int main() {
+  int extraSize = 256;
+  int blockSize = 128;
+
+  // increase heap size by 256 bytes
+  void *heapStart = sbrk(extraSize);
+  if (heapStart == (void *)-1) {
+    handle_error("sbrk");
+  }
+
+  // first block starts at the start of new heap space
+  struct header *firstBlock = (struct header *)heapStart;
+
+  // second block starts 128 bytes after first block
+  void *secondBlockAddress = (void *)((char *)heapStart + blockSize);
+  struct header *secondBlock = (struct header *)secondBlockAddress;
+
+  // init headers
+  firstBlock->size = blockSize;
+  firstBlock->next = NULL;
+
+  secondBlock->size = blockSize;
+  secondBlock->next = firstBlock;
+
+  // calc data area
+  void *firstData = (void *)((char *)firstBlock + sizeof(struct header));
+  void *secondData = (void *)((char *)secondBlock + sizeof(struct header));
+
+  size_t dataSize = blockSize - sizeof(struct header);
+
+  // init data sections
+  memset(firstData, 0, dataSize);
+  memset(secondData, 1, dataSize);
+
+  // print
+  print_out("first block:       %p\n", &firstBlock, sizeof(firstBlock));
+  print_out("second block:      %p\n", &secondBlock, sizeof(secondBlock));
+
+  print_out("first block size:  %lu\n", &(firstBlock->size), sizeof(uint64_t));
+  print_out("first block next:  %p\n", &(firstBlock->next),
+            sizeof(firstBlock->next));
+  print_out("second block size: %lu\n", &(secondBlock->size), sizeof(uint64_t));
+  print_out("second block next: %p\n", &(secondBlock->next),
+            sizeof(secondBlock->next));
+
+  unsigned char *first_byte = (unsigned char *)firstData;
+  for (size_t i = 0; i < dataSize; i++) {
+    char buf[4];
+    ssize_t len = snprintf(buf, 4, "%d\n", first_byte[i]);
+    write(STDOUT_FILENO, buf, len);
+  }
+
+  unsigned char *second_byte = (unsigned char *)secondData;
+  for (size_t i = 0; i < dataSize; i++) {
+    char buf[4];
+    ssize_t len = snprintf(buf, 4, "%d\n", second_byte[i]);
+    write(STDOUT_FILENO, buf, len);
+  }
+
+  return 0;
+}
