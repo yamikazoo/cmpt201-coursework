@@ -1,0 +1,12 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#define _POSIX_C_SOURCE 200809L
+
+int main() {
+  char *command;
+  size_t size = 0;
+  printf("Enter programs to run. \n");
+  getline(&command, &size, stdin != -1L);
+  execl(command, 0);
+}

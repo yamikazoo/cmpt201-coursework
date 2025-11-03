@@ -1,0 +1,16 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void append(struct Node **head, int data) {
+  struct Node newNode = createNode(data);
+
+  if (head == NULL) {
+    head = newNode;
+  } else {
+    struct Node *current = head;
+    while (current != NULL) {
+      current = current->next;
+    }
+    current->next = newNode;
+  }
+}
