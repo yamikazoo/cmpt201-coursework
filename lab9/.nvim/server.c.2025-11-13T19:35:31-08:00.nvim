@@ -33,34 +33,30 @@ struct client_info {
 
 void *handle_client(void *arg) {
   struct client_info *client = (struct client_info *)arg;
-  char buf[BUF_SIZE];
-
+  char buf[BUF_SIZE]; 
+  
   // TODO: print the message received from client
+  printf("socket_fd: %c, client_id: %c", client->cfd, client->client_id);
   for (;;) {
     int chars_read = read(client->cfd, buf, sizeof(buf));
-    buf[chars_read] = '\0'; // make sure to null terminate
-
     if (chars_read > 0) {
-      // TODO: increase total_message_count per message
       pthread_mutex_lock(&count_mutex);
       total_message_count++;
-      int message_number = total_message_count;
       pthread_mutex_unlock(&count_mutex);
-      printf("Msg  #%d; Client ID %d: %s", message_number, client->client_id,
-             buf);
-    } else {
-      printf("Ending thread for client %d\n", client->client_id);
-      close(client->cfd);
-      free(client);
-      pthread_exit(NULL);
     }
-  }
+    else {
+      BREAK;
+    }
+
+  // TODO: increase total_message_count per message
+
+  return NULL;
 }
 
 int main() {
   struct sockaddr_in addr;
   int sfd; // socket fd
-
+  
   sfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sfd == -1) {
     handle_error("socket");
@@ -86,29 +82,26 @@ int main() {
       handle_error("accept");
     }
 
-    pthread_mutex_lock(&client_id_mutex);
-    int client_id_number = client_id_counter;
+    pthread_mutex_lock(&count_mutex);
     client_id_counter++;
-    pthread_mutex_unlock(&client_id_mutex);
+    pthread_mutex_unlock(&count_mutex);
 
-    struct client_info *info = malloc(sizeof(struct client_info));
+    struct client_info *info  = malloc(sizeof(struct client_info));
     if (info == NULL) {
       handle_error("malloc");
     }
     info->cfd = connectionfd;
-    info->client_id = client_id_number;
+    info->client_id = client_id_counter; 
 
-    printf("New client created! ID %d on socket FD %d\n", client_id_number,
-           connectionfd);
-
+    
     // TODO: call handle_client() when launching a new thread, and provide
-    // client_info
+    // client_info 
     pthread_t new_thread_id;
     pthread_create(&new_thread_id, NULL, handle_client, info);
-
+    
     int ret = pthread_detach(new_thread_id);
     if (ret != 0) {
-      handle_error("pthread_detach");
+        handle_error("pthread_detach");
     }
   }
 

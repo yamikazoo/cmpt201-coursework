@@ -49,7 +49,7 @@ void *handle_client(void *arg) {
       printf("Msg  #%d; Client ID %d: %s", message_number, client->client_id,
              buf);
     } else {
-      printf("Ending thread for client %d\n", client->client_id);
+      printf("Ending thread for client %d", client->client_id);
       close(client->cfd);
       free(client);
       pthread_exit(NULL);

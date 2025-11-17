@@ -46,10 +46,10 @@ void *handle_client(void *arg) {
       total_message_count++;
       int message_number = total_message_count;
       pthread_mutex_unlock(&count_mutex);
-      printf("Msg  #%d; Client ID %d: %s", message_number, client->client_id,
+      printf("Msg  #%d; Client ID %d: %s\n", message_number, client->client_id,
              buf);
     } else {
-      printf("Ending thread for client %d\n", client->client_id);
+      printf("Ending thread for client %d", client->client_id);
       close(client->cfd);
       free(client);
       pthread_exit(NULL);
@@ -87,8 +87,8 @@ int main() {
     }
 
     pthread_mutex_lock(&client_id_mutex);
-    int client_id_number = client_id_counter;
     client_id_counter++;
+    int client_id_number = client_id_counter;
     pthread_mutex_unlock(&client_id_mutex);
 
     struct client_info *info = malloc(sizeof(struct client_info));

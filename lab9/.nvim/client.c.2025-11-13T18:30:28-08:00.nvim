@@ -1,22 +1,20 @@
 /*
 Questions to answer at top of client.c:
 (You should not need to change the code in client.c)
-1. What is the address of the server it is trying to connect to (IP address and
-port number). IP 127.0.0.1, port 8000
+1. What is the address of the server it is trying to connect to (IP address and port number).
+  IP 127.0.0.1, port 8000
 
 2. Is it UDP or TCP? How do you know?
-  It is TCP due to lack of recvfrom() and sendto(), and use of connect() and
-write()
+  It is TCP due to lack of recvfrom() and sendto(), and use of connect() and write()
 
-3. The client is going to send some data to the server. Where does it get this
-data from? How can you tell in the code? The data is from standard input aka
-keyboard, because of read(STDIN_FILENO, buf, size)
+3. The client is going to send some data to the server. Where does it get this data from? How can you tell in the code?
+  The data is from standard input aka keyboard, because of read(STDIN_FILENO, buf, size) 
 
 4. How does the client program end? How can you tell that in the code?
-  It ends when the num of chars read is less than or equal to 1, because of the
-while loop condition
+  It ends when the num of chars read is less than or equal to 1, because of the while loop condition
 
 */
+
 
 #include <arpa/inet.h>
 #include <stdio.h>
